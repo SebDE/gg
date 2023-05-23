@@ -661,6 +661,13 @@ func (dc *Context) DrawRegularPolygon(n int, x, y, r, rotation float64) {
 	dc.ClosePath()
 }
 
+func (dc *Context) CopyImage(im image.Image, x, y int) {
+	draw.Copy(dc.im, image.Point{
+		X: x,
+		Y: y,
+	}, im, im.Bounds(), draw.Over, nil)
+}
+
 // DrawImage draws the specified image at the specified point.
 func (dc *Context) DrawImage(im image.Image, x, y int) {
 	dc.DrawImageAnchored(im, x, y, 0, 0)
