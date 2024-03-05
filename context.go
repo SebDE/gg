@@ -757,6 +757,34 @@ func (dc *Context) drawString(im *image.RGBA, s string, x, y float64) {
 	}
 }
 
+func (dc *Context) drawBitmapString(im *image.RGBA, s string, x, y float64) {
+	d := &font.Drawer{
+		Dst:  im,
+		Src:  image.NewUniform(dc.color),
+		Face: dc.fontFace,
+		Dot:  fixp(x, y),
+	}
+	// based on Drawer.DrawString() in golang.org/x/image/font/font.go
+	prevC := rune(-1)
+	for _, c := range s {
+		if prevC >= 0 {
+			d.Dot.X += d.Face.Kern(prevC, c)
+		}
+		dr, mask, maskp, advance, ok := d.Face.Glyph(d.Dot, c)
+		if !ok {
+			// TODO: is falling back on the U+FFFD glyph the responsibility of
+			// the Drawer or the Face?
+			// TODO: set prevC = '\ufffd'?
+			continue
+		}
+		if !dr.Empty() {
+			draw.DrawMask(d.Dst, dr, d.Src, image.Point{}, mask, maskp, draw.Over)
+		}
+		d.Dot.X += advance
+		prevC = c
+	}
+}
+
 // DrawString draws the specified text at the specified point.
 func (dc *Context) DrawString(s string, x, y float64) {
 	dc.DrawStringAnchored(s, x, y, 0, 0)
@@ -774,6 +802,19 @@ func (dc *Context) DrawStringAnchored(s string, x, y, ax, ay float64) {
 	} else {
 		im := image.NewRGBA(image.Rect(0, 0, dc.width, dc.height))
 		dc.drawString(im, s, x, y)
+		draw.DrawMask(dc.im, dc.im.Bounds(), im, image.Point{}, dc.mask, image.Point{}, draw.Over)
+	}
+}
+
+func (dc *Context) DrawBitmapStringAnchored(s string, x, y, ax, ay float64) {
+	w, h := dc.MeasureString(s)
+	x -= ax * w
+	y += ay * h
+	if dc.mask == nil {
+		dc.drawBitmapString(dc.im, s, x, y)
+	} else {
+		im := image.NewRGBA(image.Rect(0, 0, dc.width, dc.height))
+		dc.drawBitmapString(im, s, x, y)
 		draw.DrawMask(dc.im, dc.im.Bounds(), im, image.Point{}, dc.mask, image.Point{}, draw.Over)
 	}
 }
