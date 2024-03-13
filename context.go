@@ -706,14 +706,16 @@ func (dc *Context) FontCache() *fontCache.FontCache {
 	return dc.fontCache
 }
 
-func (dc *Context) SetFontFaceFromCache(fontID string) {
+func (dc *Context) SetFontFaceFromCache(fontID string) error {
 	ff, err := dc.fontCache.Get(fontID)
 	if err == nil {
 		dc.SetFontFace(ff)
+		return nil
 	} else {
 		//font not found, use fallback default
 		fallback, _ := dc.fontCache.Get("regular-36")
 		dc.SetFontFace(fallback)
+		return errors.New("font not found, use fallback font")
 	}
 }
 
