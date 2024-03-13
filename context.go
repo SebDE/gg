@@ -793,21 +793,21 @@ func (dc *Context) DrawString(s string, x, y float64) {
 	dc.DrawStringAnchored(s, x, y, 0, 0)
 }
 
-func (dc *Context) DrawStringAnchoredClip(s string, x, y, ax, ay float64, bound image.Rectangle) {
+func (dc *Context) DrawStringAnchoredClip(s string, x, y, ax, ay float64, tileSize image.Point) {
 	w, h := dc.MeasureString(s)
 
-	if h > float64(bound.Max.Y) {
+	if h > float64(tileSize.Y) {
 		return
 	}
 
-	if w <= float64(bound.Max.X) {
+	if w <= float64(tileSize.X) {
 		dc.DrawStringAnchored(s, x, y, ax, ay)
 		return
 	}
 
 	for i := len(s); i > 0; i-- {
 		w, _ := dc.MeasureString(s[:i])
-		if w <= float64(bound.Max.X) {
+		if w <= float64(tileSize.X) {
 			dc.DrawStringAnchored(s[:i], x, y, ax, ay)
 			return
 		}
