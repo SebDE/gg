@@ -793,6 +793,27 @@ func (dc *Context) DrawString(s string, x, y float64) {
 	dc.DrawStringAnchored(s, x, y, 0, 0)
 }
 
+func (dc *Context) DrawStringAnchoredClip(s string, x, y, ax, ay float64, bound image.Rectangle) {
+	w, h := dc.MeasureString(s)
+
+	if h > float64(bound.Max.Y) {
+		return
+	}
+
+	if w <= float64(bound.Max.X) {
+		dc.DrawStringAnchored(s, x, y, ax, ay)
+		return
+	}
+
+	for i := len(s); i > 0; i-- {
+		w, _ := dc.MeasureString(s[:i])
+		if w <= float64(bound.Max.X) {
+			dc.DrawStringAnchored(s[:i], x, y, ax, ay)
+			return
+		}
+	}
+}
+
 // DrawStringAnchored draws the specified text at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // text. Use ax=0.5, ay=0.5 to center the text at the specified point.
