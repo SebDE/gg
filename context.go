@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/golang/freetype/raster"
-	_ "github.com/golang/freetype/truetype"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/f64"
 )
 
@@ -106,9 +106,9 @@ func NewContextForRGBA(im *image.RGBA) *Context {
 		strokePattern: defaultStrokeStyle,
 		lineWidth:     1,
 		fillRule:      FillRuleWinding,
-		//fontFace:      nil,
-		fontHeight: 13,
-		matrix:     Identity(),
+		fontFace:      basicfont.Face7x13,
+		fontHeight:    13,
+		matrix:        Identity(),
 	}
 }
 
