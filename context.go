@@ -3,6 +3,7 @@ package gg
 
 import (
 	"errors"
+	"github.com/SebDE/fontCache"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -75,6 +76,7 @@ type Context struct {
 	fillRule      FillRule
 	fontFace      font.Face
 	fontHeight    float64
+	fontCache     *fontCache.FontCache
 	matrix        Matrix
 	stack         []*Context
 }
@@ -253,7 +255,7 @@ func (dc *Context) SetHexColor(x string) {
 // SetRGBA255 sets the current color. r, g, b, a values should be between 0 and
 // 255, inclusive.
 func (dc *Context) SetRGBA255(r, g, b, a int) {
-	dc.color = color.NRGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	dc.color = color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 	dc.setFillAndStrokeColor(dc.color)
 }
 
@@ -267,10 +269,10 @@ func (dc *Context) SetRGB255(r, g, b int) {
 // inclusive.
 func (dc *Context) SetRGBA(r, g, b, a float64) {
 	dc.color = color.NRGBA{
-		uint8(r * 255),
-		uint8(g * 255),
-		uint8(b * 255),
-		uint8(a * 255),
+		R: uint8(r * 255),
+		G: uint8(g * 255),
+		B: uint8(b * 255),
+		A: uint8(a * 255),
 	}
 	dc.setFillAndStrokeColor(dc.color)
 }
@@ -283,7 +285,7 @@ func (dc *Context) SetRGB(r, g, b float64) {
 
 // Path Manipulation
 
-// MoveTo starts a new subpath within the current path starting at the
+// MoveTo starts a new sub-path within the current path starting at the
 // specified point.
 func (dc *Context) MoveTo(x, y float64) {
 	if dc.hasCurrent {
@@ -312,7 +314,7 @@ func (dc *Context) LineTo(x, y float64) {
 	}
 }
 
-// QuadraticTo adds a quadratic bezier curve to the current path starting at
+// QuadraticTo adds a quadratic Bézier curve to the current path starting at
 // the current point. If there is no current point, it first performs
 // MoveTo(x1, y1)
 func (dc *Context) QuadraticTo(x1, y1, x2, y2 float64) {
@@ -328,9 +330,9 @@ func (dc *Context) QuadraticTo(x1, y1, x2, y2 float64) {
 	dc.current = p2
 }
 
-// CubicTo adds a cubic bezier curve to the current path starting at the
+// CubicTo adds a cubic Bézier curve to the current path starting at the
 // current point. If there is no current point, it first performs
-// MoveTo(x1, y1). Because freetype/raster does not support cubic beziers,
+// MoveTo(x1, y1). Because freetype/raster does not support cubic Béziers,
 // this is emulated with many small line segments.
 func (dc *Context) CubicTo(x1, y1, x2, y2, x3, y3 float64) {
 	if !dc.hasCurrent {
@@ -356,7 +358,7 @@ func (dc *Context) CubicTo(x1, y1, x2, y2, x3, y3 float64) {
 }
 
 // ClosePath adds a line segment from the current point to the beginning
-// of the current subpath. If there is no current point, this is a no-op.
+// of the current sub-path. If there is no current point, this is a no-op.
 func (dc *Context) ClosePath() {
 	if dc.hasCurrent {
 		dc.strokePath.Add1(dc.start.Fixed())
@@ -373,7 +375,7 @@ func (dc *Context) ClearPath() {
 	dc.hasCurrent = false
 }
 
-// NewSubPath starts a new subpath within the current path. There is no current
+// NewSubPath starts a new sub-path within the current path. There is no current
 // point after this operation.
 func (dc *Context) NewSubPath() {
 	if dc.hasCurrent {
@@ -464,8 +466,8 @@ func (dc *Context) Stroke() {
 	dc.ClearPath()
 }
 
-// FillPreserve fills the current path with the current color. Open subpaths
-// are implicity closed. The path is preserved after this operation.
+// FillPreserve fills the current path with the current color. Open sub-paths
+// are implicit closed. The path is preserved after this operation.
 func (dc *Context) FillPreserve() {
 	var painter raster.Painter
 	if dc.mask == nil {
@@ -483,8 +485,8 @@ func (dc *Context) FillPreserve() {
 	dc.fill(painter)
 }
 
-// Fill fills the current path with the current color. Open subpaths
-// are implicity closed. The path is cleared after this operation.
+// Fill fills the current path with the current color. Open sub-paths
+// are implicit closed. The path is cleared after this operation.
 func (dc *Context) Fill() {
 	dc.FillPreserve()
 	dc.ClearPath()
@@ -696,6 +698,14 @@ func (dc *Context) DrawImageAnchored(im image.Image, x, y int, ax, ay float64) {
 
 // Text Functions
 
+func (dc *Context) SetFontCache(fc *fontCache.FontCache) {
+	dc.fontCache = fc
+}
+
+func (dc *Context) FontCache() *fontCache.FontCache {
+	return dc.fontCache
+}
+
 func (dc *Context) SetFontFace(fontFace font.Face) {
 	dc.fontFace = fontFace
 	dc.fontHeight = (float64(fontFace.Metrics().Height) / 64) * 72 / 96
@@ -898,13 +908,13 @@ func (dc *Context) ScaleAbout(sx, sy, x, y float64) {
 	dc.Translate(-x, -y)
 }
 
-// Rotate updates the current matrix with a anticlockwise rotation.
+// Rotate updates the current matrix with an anticlockwise rotation.
 // Rotation occurs about the origin. Angle is specified in radians.
 func (dc *Context) Rotate(angle float64) {
 	dc.matrix = dc.matrix.Rotate(angle)
 }
 
-// RotateAbout updates the current matrix with a anticlockwise rotation.
+// RotateAbout updates the current matrix with an anticlockwise rotation.
 // Rotation occurs about the specified point. Angle is specified in radians.
 func (dc *Context) RotateAbout(angle, x, y float64) {
 	dc.Translate(x, y)
