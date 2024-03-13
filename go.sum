@@ -1,5 +1,6 @@
 github.com/SebDE/fontCache v0.0.3 h1:GQS4xLG4kGhgp7OpF9HHcOm4eiM3I13kctRhhocsc0I=
 github.com/SebDE/fontCache v0.0.3/go.mod h1:tw0GcdlC6pD9jy8jXRsvsakO9FIpXGTN3wU6lS9LAY4=
+github.com/SebDE/fontCache v0.0.4/go.mod h1:tw0GcdlC6pD9jy8jXRsvsakO9FIpXGTN3wU6lS9LAY4=
 github.com/SebDE/rleFont v0.0.6 h1:9u0MDRnq0Q+oRFSPjkWbT+M2Z+T9MKgzfkaGkTse6Z4=
 github.com/SebDE/rleFont v0.0.6/go.mod h1:aocEDEKcLupn7Ia5lkSCY6THvnaGEPbDjYXi351XYbQ=
 github.com/fogleman/gg v1.3.0 h1:/7zJX8F6AaYQc57WQCyN9cAIz+4bCJGO9B+dyW29am8=
