@@ -706,6 +706,17 @@ func (dc *Context) FontCache() *fontCache.FontCache {
 	return dc.fontCache
 }
 
+func (dc *Context) SetFontFaceFromCache(fontID string) {
+	ff, err := dc.fontCache.Get(fontID)
+	if err == nil {
+		dc.SetFontFace(ff)
+	} else {
+		//font not found, use fallback default
+		fallback, _ := dc.fontCache.Get("regular-36")
+		dc.SetFontFace(fallback)
+	}
+}
+
 func (dc *Context) SetFontFace(fontFace font.Face) {
 	dc.fontFace = fontFace
 	dc.fontHeight = (float64(fontFace.Metrics().Height) / 64) * 72 / 96
