@@ -801,23 +801,12 @@ func (dc *Context) DrawStringAnchored(s string, x, y, ax, ay float64) {
 	x -= ax * w
 	y += ay * h
 	if dc.mask == nil {
-		dc.drawString(dc.im, s, x, y)
-	} else {
-		im := image.NewRGBA(image.Rect(0, 0, dc.width, dc.height))
-		dc.drawString(im, s, x, y)
-		draw.DrawMask(dc.im, dc.im.Bounds(), im, image.Point{}, dc.mask, image.Point{}, draw.Over)
-	}
-}
-
-func (dc *Context) DrawBitmapStringAnchored(s string, x, y, ax, ay float64) {
-	w, h := dc.MeasureString(s)
-	x -= ax * w
-	y += ay * h
-	if dc.mask == nil {
+		//dc.drawString(dc.im, s, x, y)
 		dc.drawBitmapString(dc.im, s, x, y)
 	} else {
 		im := image.NewRGBA(image.Rect(0, 0, dc.width, dc.height))
-		dc.drawBitmapString(im, s, x, y)
+		//dc.drawString(im, s, x, y)
+		dc.drawBitmapString(dc.im, s, x, y)
 		draw.DrawMask(dc.im, dc.im.Bounds(), im, image.Point{}, dc.mask, image.Point{}, draw.Over)
 	}
 }
